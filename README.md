@@ -22,7 +22,9 @@ emoticon-hand-gesture/
 │   ├── train/          # Training images (not in repo — download from Google Drive)
 │   └── test/           # Test images (≥15 per class)
 ├── model/
-│   └── hand_gesture_model.keras
+│   ├── hand_gesture_model.keras   # Pre-trained model (included in repo)
+│   ├── class_indices.npy
+│   └── training_curves.png
 ├── src/
 │   ├── config.py           # Shared settings
 │   ├── hand_crop.py        # MediaPipe hand detection & crop
@@ -83,7 +85,9 @@ curl -L -o model/hand_landmarker.task \
 
 > Make sure the virtual environment is active before running any scripts below.
 
-**5. Download the training images** (required for training)
+A **pre-trained model** is included in the repo (`model/hand_gesture_model.keras`), so you can skip training and go straight to [Step 4 — Run the Web App](#step-4--run-the-web-app). Download the training images (step 5) only if you want to retrain or evaluate from scratch.
+
+**5. Download the training images** (optional — only needed to retrain or evaluate)
 
 Training images are not stored in this repository (too large for Git). Download them from Google Drive:
 
@@ -97,7 +101,7 @@ unzip train-data.zip -d dataset/train
 
 > If the zip already contains a `train/` folder, extract to `dataset/` instead: `unzip train-data.zip -d dataset`
 
-Verify you have images in each class folder, then skip to [Step 2 — Train the Model](#step-2--train-the-model). To collect your own images instead, follow Step 1 below.
+Verify you have images in each class folder before running `train.py` or `evaluate.py`. To collect your own images instead of using the archive, follow Step 1 below.
 
 ---
 
@@ -148,7 +152,9 @@ This re-crops all images in `dataset/train/` and `dataset/test/` using MediaPipe
 
 ---
 
-## Step 2 — Train the Model
+## Step 2 — Train the Model (optional)
+
+Skip this step if you are using the pre-trained model already in `model/`. Training on the full dataset can take a long time.
 
 ```bash
 python src/train.py
@@ -163,7 +169,9 @@ This will:
 
 ---
 
-## Step 3 — Evaluate the Model
+## Step 3 — Evaluate the Model (optional)
+
+Requires test images in `dataset/test/`. Regenerates `confusion_matrix.png` and `metrics_report.txt` (not stored in the repo).
 
 ```bash
 python src/evaluate.py
