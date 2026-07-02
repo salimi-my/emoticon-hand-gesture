@@ -78,10 +78,18 @@ pip install -r requirements.txt
 
 **4. Download the MediaPipe hand model** (required once)
 
+macOS / Linux:
 ```bash
 curl -L -o model/hand_landmarker.task \
   https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task
 ```
+
+Windows (PowerShell):
+```powershell
+Invoke-WebRequest -Uri "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task" -OutFile "model/hand_landmarker.task"
+```
+
+> On Windows, `curl` is an alias for `Invoke-WebRequest` and does not accept `-L` / `-o`. Use the command above, or call the real curl binary: `curl.exe -L -o model/hand_landmarker.task <url>`
 
 > Make sure the virtual environment is active before running any scripts below.
 
