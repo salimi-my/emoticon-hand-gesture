@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "gradio": {
+      "url": "https://gradio-docs-mcp.hf.space/gradio_api/mcp/"
+    }
+  }
+}

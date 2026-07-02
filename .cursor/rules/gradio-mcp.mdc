@@ -1,0 +1,50 @@
+---
+description: Use Gradio MCP for docs, components, and app.py changes
+alwaysApply: true
+---
+
+# Gradio MCP
+
+This project uses Gradio 4+ for the web UI (`src/app.py`). The **gradio** MCP server is configured in `.cursor/mcp.json`.
+
+## When to use MCP
+
+Before answering Gradio questions or editing `src/app.py`, consult the MCP server instead of relying on memory:
+
+- Components: `Image`, `Textbox`, `Label`, `Tabs`, `Accordion`, `HTML`, `State`
+- Events: `.change()`, `.stream()` (webcam streaming, `time_limit`, `stream_every`)
+- Layout: `Blocks`, `Row`, `Column`, `TabItem`
+- Styling: custom `css`, `elem_id`, `elem_classes`, `gr.themes.Soft`
+- Launch options: `demo.launch()`, `server_port`, `theme`, `css`
+
+Also use MCP when the user asks how to add UI features, fix Gradio behavior, or match official patterns.
+
+## Tools
+
+Read each tool schema under `mcps/project-0-emoticon-hand-gesture-gradio/tools/` before calling.
+
+| Tool | When |
+|------|------|
+| `docs_mcp_load_gradio_docs` | Broad or conceptual questions (Blocks, events, streaming, themes) |
+| `docs_mcp_search_gradio_docs` | Specific topics (e.g. image webcam streaming, Label component, custom CSS) |
+
+Call via MCP with server **`gradio`**.
+
+### Search query tips
+
+- Keep queries short and concrete: `"image component webcam streaming"`, `"custom css elem_classes"`
+- Do **not** include the word "Gradio" in search queries
+
+## Workflow
+
+1. Load or search docs with MCP first.
+2. Read existing patterns in `src/app.py` (tabs, streaming webcam, crop preview outputs).
+3. Implement changes using current Gradio 4 APIs from MCP results.
+4. If MCP lacks an answer, say so and fall back to installed package source or official docs.
+
+## Project context
+
+- Entry point: `python src/app.py` → `http://localhost:7860`
+- Upload tab: `gr.Image` + `.change()` for single-shot prediction
+- Webcam tab: `gr.Image(streaming=True)` + `.stream()` with `gr.State` for smoothed probabilities
+- Prediction logic lives in `predict.py`; keep ML code there, UI wiring in `app.py`

@@ -1,0 +1,29 @@
+# Virtual environment
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Training images (large — download train-data.zip from Google Drive; see README)
+dataset/train/**/*
+!dataset/train/**/
+!dataset/train/**/.gitkeep
+
+# Model weights (large binary files — share via Google Drive instead)
+model/*.h5
+model/*.keras
+
+# Generated outputs (regenerate by running evaluate.py)
+model/confusion_matrix.png
+model/training_curves.png
+model/metrics_report.txt
+model/class_indices.npy
+
+# macOS
+.DS_Store
+
+# VS Code / Cursor
+.vscode/
