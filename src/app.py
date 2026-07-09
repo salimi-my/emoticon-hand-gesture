@@ -13,8 +13,14 @@ Usage:
 
 import os
 import sys
+import threading
+import webbrowser
 
 import gradio as gr
+import uvicorn
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(BASE_DIR, "src"))
@@ -53,15 +59,20 @@ PAGE_KEYWORDS = (
 )
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
-SEO_IMAGE_PATH = os.path.join(STATIC_DIR, "seo-preview.png")
+# NOTE: must NOT be "/assets" or "/static" — those paths are reserved internally
+# by Gradio for its own JS/CSS bundle and would 404 the entire app if shadowed.
+SEO_ASSETS_MOUNT_PATH = "/seo-assets"
+SEO_IMAGE_URL = f"{PUBLIC_APP_URL}{SEO_ASSETS_MOUNT_PATH}/seo-preview.png"
 
-# Serve src/static/* directly (no cache copy) so the SEO image has a stable URL.
-gr.set_static_paths(paths=[STATIC_DIR])
-SEO_IMAGE_URL = f"{PUBLIC_APP_URL}/gradio_api/file={SEO_IMAGE_PATH}"
-
-# Injected into <head> via demo.launch(head=...) — controls how the page is
-# represented in search results and link previews (Open Graph / Twitter cards).
-SEO_HEAD_HTML = f"""
+# NOTE: Gradio's Blocks template does NOT render the `head=` launch parameter into
+# the actual <head> HTML (server- or client-side) — it only ends up as inert data
+# in `window.gradio_config.head`. That means link-preview crawlers (Facebook,
+# Twitter/X, Slack, LinkedIn, WhatsApp, ...), which don't execute JavaScript, never
+# see these tags and instead fall back to Gradio's own hardcoded branding image.
+# To get real OG/Twitter previews we serve a small static HTML snippet with real
+# meta tags directly to known bot user agents (see `serve_bot_preview` below),
+# while regular browsers still get the full interactive Gradio app.
+SEO_META_TAGS = f"""\
 <meta name="description" content="{PAGE_DESCRIPTION}">
 <meta name="keywords" content="{PAGE_KEYWORDS}">
 <meta property="og:title" content="{PAGE_TITLE}">
@@ -73,6 +84,42 @@ SEO_HEAD_HTML = f"""
 <meta name="twitter:description" content="{PAGE_DESCRIPTION}">
 <meta name="twitter:image" content="{SEO_IMAGE_URL}">
 """
+
+CRAWLER_PREVIEW_HTML = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{PAGE_TITLE}</title>
+{SEO_META_TAGS}</head>
+<body></body>
+</html>
+"""
+
+# User-agent substrings used by link-preview / social-share crawlers.
+BOT_USER_AGENTS = (
+    "facebookexternalhit",
+    "twitterbot",
+    "linkedinbot",
+    "slackbot",
+    "whatsapp",
+    "telegrambot",
+    "discordbot",
+    "pinterest",
+    "redditbot",
+    "vkshare",
+    "skypeuripreview",
+    "embedly",
+    "quora link preview",
+    "tumblr",
+    "bitlybot",
+    "outbrain",
+    "w3c_validator",
+)
+
+
+def is_crawler(user_agent: str) -> bool:
+    ua = user_agent.lower()
+    return any(bot in ua for bot in BOT_USER_AGENTS)
 
 
 def build_interface(model, idx_to_class):
@@ -510,17 +557,35 @@ def main():
 
     demo, css = build_interface(model, idx_to_class)
 
-    print("\nStarting Gradio server...")
-    print(f"Open your browser at: http://localhost:{GRADIO_SERVER_PORT}\n")
-    demo.launch(
-        server_name="0.0.0.0",
-        server_port=GRADIO_SERVER_PORT,
-        share=False,
-        inbrowser=GRADIO_INBROWSER,
+    fastapi_app = FastAPI()
+    fastapi_app.mount(
+        SEO_ASSETS_MOUNT_PATH, StaticFiles(directory=STATIC_DIR), name="seo-assets"
+    )
+
+    @fastapi_app.middleware("http")
+    async def serve_bot_preview(request: Request, call_next):
+        user_agent = request.headers.get("user-agent", "")
+        if request.url.path == "/" and is_crawler(user_agent):
+            return HTMLResponse(CRAWLER_PREVIEW_HTML)
+        return await call_next(request)
+
+    fastapi_app = gr.mount_gradio_app(
+        fastapi_app,
+        demo,
+        path="/",
         theme=gr.themes.Soft(primary_hue="blue"),
         css=css,
-        head=SEO_HEAD_HTML,
     )
+
+    print("\nStarting Gradio server...")
+    print(f"Open your browser at: http://localhost:{GRADIO_SERVER_PORT}\n")
+
+    if GRADIO_INBROWSER:
+        threading.Timer(
+            1.5, lambda: webbrowser.open(f"http://localhost:{GRADIO_SERVER_PORT}")
+        ).start()
+
+    uvicorn.run(fastapi_app, host="0.0.0.0", port=GRADIO_SERVER_PORT)
 
 
 if __name__ == "__main__":
