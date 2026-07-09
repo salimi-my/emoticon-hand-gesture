@@ -16,6 +16,7 @@ import sys
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
