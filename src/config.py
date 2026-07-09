@@ -35,3 +35,10 @@ CLASS_EMOJIS = {
 TARGET_COUNTS = {"train": 35, "test": 15}
 
 IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png")
+
+# --- Deployment/performance tuning (override via env vars in production) ---
+TF_INTRA_OP_THREADS = int(os.environ.get("TF_INTRA_OP_THREADS", "2"))
+TF_INTER_OP_THREADS = int(os.environ.get("TF_INTER_OP_THREADS", "2"))
+STREAM_EVERY = float(os.environ.get("STREAM_EVERY", "0.15"))
+GRADIO_SERVER_PORT = int(os.environ.get("GRADIO_SERVER_PORT", "7860"))
+GRADIO_INBROWSER = os.environ.get("GRADIO_INBROWSER", "false").lower() in ("1", "true", "yes")

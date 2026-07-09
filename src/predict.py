@@ -13,8 +13,15 @@ from config import (
     IMG_SIZE,
     MODEL_PATH,
     MODEL_PATH_LEGACY,
+    TF_INTER_OP_THREADS,
+    TF_INTRA_OP_THREADS,
 )
 from hand_crop import crop_hand_pil
+
+# Must run before any TF op executes. Caps thread pool size so inference
+# doesn't compete with Nginx/MySQL/etc. for CPU on a shared VPS.
+tf.config.threading.set_intra_op_parallelism_threads(TF_INTRA_OP_THREADS)
+tf.config.threading.set_inter_op_parallelism_threads(TF_INTER_OP_THREADS)
 
 _predict_fn = None
 PREVIEW_SIZE = (256, 256)

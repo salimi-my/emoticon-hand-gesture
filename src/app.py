@@ -19,7 +19,12 @@ import gradio as gr
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(BASE_DIR, "src"))
 
-from config import MODEL_PATH  # noqa: E402
+from config import (  # noqa: E402
+    GRADIO_INBROWSER,
+    GRADIO_SERVER_PORT,
+    MODEL_PATH,
+    STREAM_EVERY,
+)
 from predict import (  # noqa: E402
     crop_for_model,
     crop_preview,
@@ -331,7 +336,7 @@ def build_interface(model, idx_to_class):
     }}
     """
 
-    with gr.Blocks(title="Hand Gesture Classifier") as demo:
+    with gr.Blocks(title="Hand Gesture Classifier", analytics_enabled=False) as demo:
 
         gr.Markdown(
             "# ✌️ 👌 👊 👍 🤚  Hand Gesture Classifier",
@@ -444,7 +449,7 @@ def build_interface(model, idx_to_class):
                 fallback_notice,
             ],
             time_limit=30,
-            stream_every=0.15,
+            stream_every=STREAM_EVERY,
         )
 
         gr.Markdown(
@@ -472,12 +477,12 @@ def main():
     demo, css = build_interface(model, idx_to_class)
 
     print("\nStarting Gradio server...")
-    print("Open your browser at: http://localhost:7860\n")
+    print(f"Open your browser at: http://localhost:{GRADIO_SERVER_PORT}\n")
     demo.launch(
         server_name="0.0.0.0",
-        server_port=7860,
+        server_port=GRADIO_SERVER_PORT,
         share=False,
-        inbrowser=True,
+        inbrowser=GRADIO_INBROWSER,
         theme=gr.themes.Soft(primary_hue="blue"),
         css=css,
     )
