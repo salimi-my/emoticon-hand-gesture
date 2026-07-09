@@ -42,3 +42,8 @@ TF_INTER_OP_THREADS = int(os.environ.get("TF_INTER_OP_THREADS", "2"))
 STREAM_EVERY = float(os.environ.get("STREAM_EVERY", "0.15"))
 GRADIO_SERVER_PORT = int(os.environ.get("GRADIO_SERVER_PORT", "7860"))
 GRADIO_INBROWSER = os.environ.get("GRADIO_INBROWSER", "false").lower() in ("1", "true", "yes")
+
+# Public URL the app is deployed at (e.g. "https://your-space.hf.space"), used to
+# build absolute og:image/twitter:image URLs for link previews. Leave unset for
+# local development — the SEO image tag then falls back to a relative URL.
+PUBLIC_APP_URL = os.environ.get("PUBLIC_APP_URL", "").rstrip("/")

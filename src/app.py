@@ -23,6 +23,7 @@ from config import (  # noqa: E402
     GRADIO_INBROWSER,
     GRADIO_SERVER_PORT,
     MODEL_PATH,
+    PUBLIC_APP_URL,
     STREAM_EVERY,
 )
 from predict import (  # noqa: E402
@@ -39,6 +40,39 @@ SMOOTH_WINDOW = 5
 PREVIEW_HEIGHT = 550
 CROP_PREVIEW_HEIGHT = 248
 CONFIDENCE_MIN_HEIGHT = 290
+
+PAGE_TITLE = "Hand Gesture Classifier — Peace, Okay, Fist, Thumbs Up, High Five"
+PAGE_DESCRIPTION = (
+    "Real-time hand gesture classifier built with MediaPipe hand cropping and a "
+    "MobileNetV2 CNN. Upload a photo or use your webcam to recognise Peace, Okay, "
+    "Fist, Thumbs Up, and High Five gestures instantly."
+)
+PAGE_KEYWORDS = (
+    "hand gesture recognition, gesture classifier, MediaPipe, MobileNetV2, CNN, "
+    "computer vision, webcam gesture detection, emoji hand signs"
+)
+
+STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+SEO_IMAGE_PATH = os.path.join(STATIC_DIR, "seo-preview.png")
+
+# Serve src/static/* directly (no cache copy) so the SEO image has a stable URL.
+gr.set_static_paths(paths=[STATIC_DIR])
+SEO_IMAGE_URL = f"{PUBLIC_APP_URL}/gradio_api/file={SEO_IMAGE_PATH}"
+
+# Injected into <head> via demo.launch(head=...) — controls how the page is
+# represented in search results and link previews (Open Graph / Twitter cards).
+SEO_HEAD_HTML = f"""
+<meta name="description" content="{PAGE_DESCRIPTION}">
+<meta name="keywords" content="{PAGE_KEYWORDS}">
+<meta property="og:title" content="{PAGE_TITLE}">
+<meta property="og:description" content="{PAGE_DESCRIPTION}">
+<meta property="og:type" content="website">
+<meta property="og:image" content="{SEO_IMAGE_URL}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{PAGE_TITLE}">
+<meta name="twitter:description" content="{PAGE_DESCRIPTION}">
+<meta name="twitter:image" content="{SEO_IMAGE_URL}">
+"""
 
 
 def build_interface(model, idx_to_class):
@@ -336,7 +370,7 @@ def build_interface(model, idx_to_class):
     }}
     """
 
-    with gr.Blocks(title="Hand Gesture Classifier", analytics_enabled=False) as demo:
+    with gr.Blocks(title=PAGE_TITLE, analytics_enabled=False) as demo:
 
         gr.Markdown(
             "# ✌️ 👌 👊 👍 🤚  Hand Gesture Classifier",
@@ -485,6 +519,7 @@ def main():
         inbrowser=GRADIO_INBROWSER,
         theme=gr.themes.Soft(primary_hue="blue"),
         css=css,
+        head=SEO_HEAD_HTML,
     )
 
 
