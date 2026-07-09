@@ -99,7 +99,7 @@ A **pre-trained model** is included in the repo (`model/hand_gesture_model.keras
 
 Training images are not stored in this repository (too large for Git). Download them from Google Drive:
 
-**[train-data.zip on Google Drive](https://drive.google.com/file/d/19h37yYgpA5GhXJsR4IJSqL2g-DGhIdbW/view?usp=sharing)**
+**[train-data.zip on Google Drive](https://drive.google.com/file/d/1TqvPP2wPvsY9BsqpYQJk_E4FHpR28Qdw/view?usp=sharing)**
 
 Extract the zip so images land under `dataset/train/` (one folder per class: `peace`, `okay`, `fist`, `thumbs_up`, `high_five`):
 
